@@ -14,7 +14,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif()
 
-set(executables d1)
+set(executables d1 d2)
 
 foreach(executable ${executables})
     file(GLOB_RECURSE sources ${executable}/*.cxx ${executable}/*.hxx)
