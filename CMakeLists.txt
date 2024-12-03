@@ -12,6 +12,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+    add_compile_options(-Wno-c23-extensions)
 endif()
 
 set(executables d1 d2 d3)
