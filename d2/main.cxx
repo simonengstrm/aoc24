@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <chrono>
 
 using namespace std;
 
@@ -58,7 +59,7 @@ int part2() {
         }
     }
 
-    cout << safe_reports << endl;
+    //cout << safe_reports << endl;
     return 0;
 }
 
@@ -86,12 +87,17 @@ int part1() {
             safe_reports++;
         }
     }
-    cout << safe_reports << endl;
+    //cout << safe_reports << endl;
     return 0;
 }
 
 int main() {
+    auto start = std::chrono::high_resolution_clock::now();
     part1();
     part2();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    cout << duration.count() << endl;
+    // Print in microseconds
     return 0;
 }
