@@ -1,27 +1,24 @@
+#include <chrono>
 #include <iostream>
 #include <fstream>
+#include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <map>
 #include <algorithm>
 
 using namespace std;
 
-map<int, vector<int>> orders;
-
-bool isInList(vector<int> list, int number) {
-    for (int i = 0; i < list.size(); i++) {
-        if (list[i] == number) {
-            return true;
-        }
+struct hashFunction {
+    size_t operator()(const pair<int, int> &p) const {
+        return hash<int>()(p.first) ^ hash<int>()(p.second);
     }
-    return false;
-}
+};
 
-bool checkOrder(vector<int> update, int index, int number, map<int, vector<int>> orders) {
+bool checkOrder(vector<int> update, int index, int number, unordered_set<pair<int,int>, hashFunction> orders) {
     for (int i = 0; i < index; i++) {
-        if (!isInList(orders[update[i]], number)) {
-            cout << "Number " << number << " is not in the list of " << update[i] << endl;
+        if (orders.find({update[i], number}) == orders.end()) {
             return false;
         }
     }
@@ -31,7 +28,7 @@ bool checkOrder(vector<int> update, int index, int number, map<int, vector<int>>
 int part1() {
     ifstream file("../d5/input.txt");
     string line;
-    map<int, vector<int>> orders;
+    unordered_set<pair<int, int>, hashFunction> orders;
     vector<vector<int>> updates;
     vector<int> correctUpdateIndices;
 
@@ -42,7 +39,7 @@ int part1() {
         // Split at | and parse out number before and after
         string s1 = line.substr(0, line.find('|'));
         string s2 = line.substr(line.find('|') + 1, line.length());
-        orders[stoi(s1)].push_back(stoi(s2));
+        orders.insert({stoi(s1), stoi(s2)});
     }
 
     // Parse updates
@@ -58,20 +55,11 @@ int part1() {
         updates.push_back(update);
     }
 
-    // Print updates
-    for (int i = 0; i < updates.size(); i++) {
-        for (int n = 0; n < updates[i].size(); n++) {
-            cout << updates[i][n] << " ";
-        }
-        cout << endl;
-    }
-
     // Run updates and check their orders
     for (int i = 0; i < updates.size(); i++) {
         bool correct = true;
-        for (int n = 0; n < updates[i].size(); n++) {
-            cout << "Checking " << updates[i][n] << " at index " << n << endl;
-            if (!checkOrder(updates[i], n, updates[i][n], orders)) {
+        for (int j = 1; j < updates[i].size(); j++) {
+            if (orders.find({updates[i][j - 1], updates[i][j]}) == orders.end()) {
                 correct = false;
                 break;
             }
@@ -92,21 +80,12 @@ int part1() {
     return 0;
 }
 
-bool comp(int a, int b) {
-    // Check who precedes who
-    for (int i = 0; i < orders[a].size(); i++) {
-        if (orders[a][i] == b) {
-            return true;
-        }
-    }
-    return false;
-} 
-
 int part2() {
     ifstream file("../d5/input.txt");
     string line;
     vector<vector<int>> updates;
     vector<vector<int>> inCorrectUpdates;
+    unordered_set<pair<int, int>, hashFunction> orders;
 
     while (getline(file, line)) {
         if (line == "") {
@@ -115,7 +94,7 @@ int part2() {
         // Split at | and parse out number before and after
         string s1 = line.substr(0, line.find('|'));
         string s2 = line.substr(line.find('|') + 1, line.length());
-        orders[stoi(s1)].push_back(stoi(s2));
+        orders.insert({stoi(s1), stoi(s2)});
     }
 
     // Parse updates
@@ -131,37 +110,28 @@ int part2() {
         updates.push_back(update);
     }
 
-    // Print updates
-    for (int i = 0; i < updates.size(); i++) {
-        for (int n = 0; n < updates[i].size(); n++) {
-            cout << updates[i][n] << " ";
-        }
-        cout << endl;
-    }
-
     // Run updates and check their orders
     for (int i = 0; i < updates.size(); i++) {
-        bool correct = true;
-        for (int n = 0; n < updates[i].size(); n++) {
-            if (!checkOrder(updates[i], n, updates[i][n], orders)) {
-                correct = false;
+        // Window over the update in sizes of two and check order with comparator
+        for (int j = 1; j < updates[i].size(); j++) {
+            if (orders.find({updates[i][j - 1], updates[i][j]}) == orders.end()) {
                 inCorrectUpdates.push_back(updates[i]);
                 break;
             }
         }
+        
     }
 
-    // Sort the incorrect updates
+    auto comp = [&orders](int a, int b) {
+        // Check who precedes who
+        if (orders.find({a, b}) != orders.end()) {
+            return true;
+        }
+        return false;
+    };
+
     for (auto &update : inCorrectUpdates) {
         sort(update.begin(), update.end(), comp);
-    }
-
-    // Print sorted updates
-    for (auto update : inCorrectUpdates) {
-        for (auto number : update) {
-            cout << number << " ";
-        }
-        cout << endl;
     }
 
     int sum = 0;
@@ -174,6 +144,13 @@ int part2() {
 }
 
 int main() {
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+    part1();
     part2();
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    cout << "Time: " << duration << " microseconds" << endl;
+
     return 0;
 }
