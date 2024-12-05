@@ -15,7 +15,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-c23-extensions)
 endif()
 
-set(executables d1 d2 d3)
+set(executables d1 d2 d3 d4 d5)
 
 foreach(executable ${executables})
     file(GLOB_RECURSE sources ${executable}/*.cxx ${executable}/*.hxx)
