@@ -55,7 +55,6 @@ int part1() {
         updates.push_back(update);
     }
 
-    // Run updates and check their orders
     for (int i = 0; i < updates.size(); i++) {
         bool correct = true;
         for (int j = 1; j < updates[i].size(); j++) {
