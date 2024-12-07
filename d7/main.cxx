@@ -12,7 +12,29 @@ enum Operator {
     OR
 };
 
-void generatePermutations(std::vector<std::vector<Operator>> &perms, int size) {
+void generatePermutationsp1(std::vector<std::vector<Operator>> &perms, int size) {
+    std::vector<Operator> perm(size);
+    for (int i = 0; i < size; i++) {
+        perm[i] = MUL;
+    }
+    perms.push_back(perm);
+    while (true) {
+        int i = size - 1;
+        while (i >= 0 && perm[i] == ADD) {
+            i--;
+        }
+        if (i < 0) {
+            break;
+        }
+        perm[i] = static_cast<Operator>(perm[i] + 1);
+        for (int j = i + 1; j < size; j++) {
+            perm[j] = MUL;
+        }
+        perms.push_back(perm);
+    }
+}
+
+void generatePermutationsp2(std::vector<std::vector<Operator>> &perms, int size) {
     std::vector<Operator> perm(size);
     for (int i = 0; i < size; i++) {
         perm[i] = MUL;
@@ -55,7 +77,49 @@ int part1() {
 
     for (auto [target, values] : cals) {
         std::vector<std::vector<Operator>> perms;
-        generatePermutations(perms, values.size() - 1);
+        generatePermutationsp1(perms, values.size() - 1);
+        for (auto &perm : perms) {
+            long result = values[0];
+            for (int i = 0; i < values.size() - 1; i++) {
+                if (perm[i] == MUL) {
+                    result *= values[i + 1];
+                } else {
+                    result += values[i + 1];
+                }
+            }
+
+            if (result == target) {
+                sum += target;
+                break;
+            }
+        }
+    }
+    cout << sum << endl;
+    return 0;
+}
+
+int part2() {
+    std::ifstream file("../d7/input.txt");
+    string line;
+
+    std::map<long, std::vector<long>> cals; // Cals is short for calibration guys, im just using slang
+
+    while (std::getline(file, line)) {
+        //cout << line << endl;
+        long result = stol(line.substr(0, line.find(':')));
+        string rest = line.substr(line.find(':') + 2);
+        std::istringstream iss(rest);
+        string token;
+        while (iss >> token) {
+            cals[result].push_back(stol(token));
+        }
+    }
+
+    long sum = 0;
+
+    for (auto [target, values] : cals) {
+        std::vector<std::vector<Operator>> perms;
+        generatePermutationsp2(perms, values.size() - 1);
         for (auto &perm : perms) {
             long result = values[0];
             for (int i = 0; i < values.size() - 1; i++) {
@@ -83,5 +147,6 @@ int part1() {
 
 int main() {
     part1();
+    part2();
     return 0;
 }
