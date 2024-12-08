@@ -31,21 +31,25 @@ int main() {
         }
     }
 
-    for (int i = 0; i < antennas.size(); i++) {
-        int y1 = antennas[i].first;
-        int x1 = antennas[i].second;
-        for (int j = i + 1; j < antennas.size(); j++) {
-            int y2 = antennas[j].first;
-            int x2 = antennas[j].second;
+    for (auto [y1, x1] : antennas) {
+        for (auto [y2, x2] : antennas) {
             if (y1 == y2 && x1 == x2 || grid[y1][x1] != grid[y2][x2]) {
                 continue;
             }
-            int dx = x2 - x1;
+
+            // Find antinode to this pair of antennas
             int dy = y2 - y1;
-            int current_y = y2;
-            int current_x = x2;
-            // Check distance from point to antennas
-            
+            int dx = x2 - x1;
+
+            int current_y = (y2 + dy) % grid.size();
+            int current_x = (x2 + dx) % grid[0].size();
+
+            // Check if its an antinode or not
+            float distance1 = sqrt(pow(y1 - current_y, 2) + pow(x1 - current_x, 2));
+            float distance2 = sqrt(pow(y2 - current_y, 2) + pow(x2 - current_x, 2));
+            if (distance1*2 == distance2 || distance2*2 == distance1) {
+                antinodes.insert({current_y, current_x});
+            }
         }
     }
 
