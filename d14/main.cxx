@@ -2,7 +2,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -78,24 +77,19 @@ int part1(vector<Robot> robots) {
         r.y = ((r.y % gridy) + gridy) % gridy;
     }
 
-    std::unordered_map<std::pair<int, int>, int, hashPair> posCount;
-    for (auto &r : robots) {
-        posCount[{r.x, r.y}]++;
-    }
-
     // Count number of robots in each quadrant, disregard the middle
     int mx = gridx / 2;
     int my = gridy / 2;
     int q1 = 0, q2 = 0, q3 = 0, q4 = 0;
-    for (auto &[pos, count] : posCount) {
-        if (pos.first < mx && pos.second < my) {
-            q1 += count;
-        } else if (pos.first < mx && pos.second > my) {
-            q2 += count;
-        } else if (pos.first > mx && pos.second < my) {
-            q3 += count;
-        } else if (pos.first > mx && pos.second > my) {
-            q4 += count;
+    for (auto &r : robots) {
+        if (r.x < mx && r.y < my) {
+            q1 += 1;
+        } else if (r.x < mx && r.y > my) {
+            q2 += 1;
+        } else if (r.x > mx && r.y < my) {
+            q3 += 1;
+        } else if (r.x > mx && r.y > my) {
+            q4 += 1;
         }
     }
 
