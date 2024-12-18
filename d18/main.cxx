@@ -124,7 +124,6 @@ int part2(std::vector<Byte> bytes, std::vector<std::vector<char>> memory) {
     int hi = bytes.size();
     int lo = 0;
     // Binary search, first dijktras to fail is the last byte to be placed
-    // 111111111111111111111111111100000000000000
     while (lo < hi) {
         int mid = lo + (hi - lo) / 2;
         for (int i = 0; i < mid; i++) {
@@ -136,10 +135,8 @@ int part2(std::vector<Byte> bytes, std::vector<std::vector<char>> memory) {
             hi = mid;
         }
         // Reset memory
-        for (int i = 0; i < 71; i++) {
-            for (int j = 0; j < 71; j++) {
-                memory[i][j] = '.';
-            }
+        for (int i = 0; i < mid; i++) {
+            memory[bytes[i].y][bytes[i].x] = '.';
         }
     }
 
