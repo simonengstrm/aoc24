@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <iterator>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -91,64 +92,48 @@ int indexOf(std::vector<std::pair<int,int>> &path, std::pair<int,int> pos) {
     return -1;
 }
 
+// Manhattan distance
+int manhattan_distance(std::pair<int,int> a, std::pair<int,int> b) {
+    return abs(a.first - b.first) + abs(a.second - b.second);
+}
+
 int part2(std::vector<std::vector<char>> &grid, std::pair<int, int> start, std::pair<int, int> end) {
     // Find path from start to end using bfs
     std::vector<std::pair<int,int>> path = bfs_path(grid, start, end);
     cout << "Path length: " << path.size() << endl;
     std::unordered_set<Shortcut> shortcuts;
-
-    std::vector<std::pair<int, int>> directions = {{0,1}, {0,-1}, {1,0}, {-1,0}};
     
     for (int i = 0; i < path.size(); i++) {
         int y = path[i].first;
         int x = path[i].second;
+        // Collect all path positions with manhattan distance of <= 20 from current
 
-        std::unordered_set<std::pair<int,int>> visited;
-        std::vector<std::vector<int>> distance(grid.size(), std::vector<int>(grid[0].size(), -1));
+        for (int j = i; j < path.size(); j++) {
+            int new_y = path[j].first;
+            int new_x = path[j].second;
 
-        std::queue<std::pair<int,int>> q;
-        q.push({y,x});
-        visited.insert({y,x});
-        distance[y][x] = 0;
-
-        while (!q.empty()) {
-            std::pair<int,int> node = q.front();
-            q.pop();
-
-            if (distance[node.first][node.second] == 20) {
-                continue;
-            }
-
-            for (auto [dir_y, dir_x] : directions) {
-                int new_y = node.first + dir_y;
-                int new_x = node.second + dir_x;
-
-                if (inBounds(grid, {new_y, new_x}) && visited.find({new_y, new_x}) == visited.end()) {
-                    q.push({new_y, new_x});
-                    visited.insert({new_y, new_x});
-                    distance[new_y][new_x] = distance[node.first][node.second] + 1;
-
-                    if (grid[new_y][new_x] != '#') {
-                        // Calculate how many steps are saved by taking the shortcut
-                        int total = path.size();
-                        std::pair<int,int> shortcut_end = std::make_pair(new_y, new_x);
-                        int index = indexOf(path, shortcut_end);
-                        int index_to_end = path.size() - index;
-                        int total_with_shortcut = i + distance[new_y][new_x] + index_to_end;
-                        int saved_steps = total - total_with_shortcut;
-                        if (saved_steps >= 100) {
-                            shortcuts.insert({path[i], shortcut_end, saved_steps});
-                        }
-                    }
+            int shortcut_distance = manhattan_distance(path[i], path[j]);
+            if (shortcut_distance <= 20) {
+                // Calculate saved steps
+                // Saved steps = number of steps between i and j in the path list
+                int total_with_shortcut = i + shortcut_distance + (path.size() - j);
+                int saved = path.size() - total_with_shortcut;
+                if (saved >= 100) {
+                    shortcuts.insert({path[i], path[j], saved});
                 }
             }
         }
+            
     }
 
     // Counte the number of shortcuts with a specific number of saved steps
     std::map<int, int> shortcut_to_count;
     for (auto shortcut : shortcuts) {
         shortcut_to_count[shortcut.saved_steps]++;
+    }
+
+    for (auto [steps, count] : shortcut_to_count) {
+        cout << "Shortcuts with " << steps << " saved steps: " << count << endl;
     }
 
     cout << "Total shortcuts: " << shortcuts.size() << endl;
